@@ -3,10 +3,7 @@ from devices.handler_devices import HandlerDevice
 from exceptions.exceptions import NotIsADiretoryError
 
 from string import ascii_letters, digits
-from threading import Thread
 from random import choice
-
-from time import sleep
 import os
 
 
@@ -85,6 +82,9 @@ class IMSB:
 
 
 if __name__ == '__main__':
+    from threading import Thread
+    from time import sleep
+
     backup_1 = IMSB()
     path_1 = '/home/jaedson/Documentos/PythonDIO'
 
