@@ -2,6 +2,7 @@ import os
 
 SYSTEM = os.uname().sysname
 
+# configuração para Linux
 if SYSTEM == 'Linux':
     USERNAME = os.getenv('USER')
     LINUX_PATH_DEVICES = [f'/media/{USERNAME}']
@@ -23,6 +24,10 @@ class HandlerDevice:
 
         for d in LINUX_PATH_DEVICES:
             complete_path = lambda a: f'{d}/{a}'
+
+            # retorna apenas o caminho
+            # de dispositivos que estejam
+            # montados.
             list_media = map(complete_path, os.listdir(d))
 
             connected_devices.extend(map(check_mount, list_media))
