@@ -10,11 +10,11 @@ if SYSTEM == 'Linux':
 
 class HandlerDevice:
     @staticmethod
-    def check_devices():
+    def check_devices() -> [list, bool]:
         """Procura por dispositivos
         USB ou discos que estão conectados."""
 
-        def check_mount(a):
+        def check_mount(a) -> [str, bool]:
             if os.path.ismount(a):
                 return a
 

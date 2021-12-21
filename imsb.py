@@ -1,5 +1,7 @@
 from files.handler_files import HandlerFile
 from devices.handler_devices import HandlerDevice
+
+from exceptions.exceptions import DeviceDiretoryNotFindError
 from exceptions.exceptions import NotIsADiretoryError
 
 from string import ascii_letters, digits
@@ -17,13 +19,13 @@ class IMSB:
         self.finished_diretories = 0
 
     @staticmethod
-    def __generate_id():
+    def __generate_id() -> str:
         caracters = ascii_letters + digits
         id_backup = ''.join([choice(caracters) for __ in range(16)])
 
         return id_backup
 
-    def backup(self, path: str):
+    def backup(self, path: str) -> None:
         """Realiza o backup do último
         diretório do caminho.
 
@@ -80,26 +82,70 @@ class IMSB:
 
         self.finished = True
 
+    def recovery(self, backup_id: str, recovery_local: str = None) -> bool:
+        """Recupera o backup com o
+        ID especificado.
 
-if __name__ == '__main__':
-    from threading import Thread
-    from time import sleep
+        Você pode obter o ID pelo
+        nome do arquivo no diretório
+        backups.
 
-    backup_1 = IMSB()
-    path_1 = '/home/jaedson/Documentos/PythonDIO'
+        :param backup_id: ID do backup
+        :param recovery_local: Caminho para onde
+        o backup recuperado irá. Exemplo:
+        "/media/username/device_name"
 
-    backup_2 = IMSB()
-    path_2 = '/home/jaedson/Documentos/reconhecimentoImagens'
+        :return:
+        """
 
-    Thread(target=backup_1.backup, args=[path_1]).start()
-    Thread(target=backup_2.backup, args=[path_2]).start()
+        # Como funciona o recovery:
+        #
+        # Primeiramente, obtemos os dados em JSON
+        # do arquivo de backup apartir do ID e
+        # guardamamos em uma variável denominada
+        # de "backup".
+        #
+        # No primeiro loop for, obtemos o nome
+        # do diretório e o conteúdo dele. Logo
+        # em seguida, criamos este diretório
+        # na pasta HOME do usuário. Se o diretório
+        # já existir, um erro é disparado.
+        #
+        # No segundo loop, iteramos sob o conteúdo
+        # do diretório obtido no primeiro loop, assim
+        # conseguimos obter o nome e o base64 do arquivo
+        # que está dentro desse diretório. Após isso,
+        # convertemos o base64 para o conteúdo original
+        # do arquivo e salvamos.
 
-    while True:
-        print(f'Backup 1: {backup_1.finished_diretories}, '
-              f'Backup 2: {backup_2.finished_diretories}\r', end='')
+        recovery_path = self.home
 
-        if backup_1.finished and backup_2.finished:
-            print('Finalizado')
-            break
+        if recovery_local:
+            devices = HandlerDevice.check_devices()
 
-        sleep(2)
+            if recovery_local not in devices:
+                raise DeviceDiretoryNotFindError
+
+            recovery_path = recovery_local
+
+        backup = HandlerFile.get_backup_content(backup_id)
+        if not backup:
+            return False
+
+        for dir, content in backup.items():
+            path = f'{recovery_path}/{dir}'
+
+            try:
+                os.mkdir(path)
+            except FileExistsError:
+                raise FileExistsError(f'Já existe um diretório: {path}.')
+
+            for name, base in content.items():
+                path_file = f'{path}/{name}'
+
+                with open(path_file, 'wb') as file:
+                    content_file = HandlerFile.base64_to_string(base.encode())
+                    file.write(content_file)
+
+
+IMSB().recovery('Y5nEs03vbApzDFkR', recovery_local='/media/jaedson/JSDN21')

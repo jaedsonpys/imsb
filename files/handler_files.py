@@ -6,7 +6,7 @@ import json
 
 class HandlerFile:
     @staticmethod
-    def file_to_base64(file: [TextIO, BinaryIO]):
+    def file_to_base64(file: [TextIO, BinaryIO]) -> str:
         """Retorna o conteudo de um arquivo
         em base64."""
 
@@ -18,15 +18,15 @@ class HandlerFile:
         return file_content_base.decode()
 
     @staticmethod
-    def base64_to_string(base64: bytes):
+    def base64_to_string(base64: bytes) -> bytes:
         """Retorna o conteúdo do base64 em
         ascii."""
 
         base64_decode = b64decode(base64)
-        return base64_decode.decode()
+        return base64_decode
 
     @staticmethod
-    def get_basename(path: str):
+    def get_basename(path: str) -> tuple:
         """Retorna o nome e index do
         último diretório do caminho"""
 
@@ -38,7 +38,7 @@ class HandlerFile:
         return basename, index
 
     @staticmethod
-    def save_json_data(backup_id: str, path_key: str, content: dict):
+    def save_json_data(backup_id: str, path_key: str, content: dict) -> bool:
         path_backups = f'./backups'
         path_json = f'{path_backups}/{backup_id}.json'
 
@@ -65,6 +65,18 @@ class HandlerFile:
             json.dump(json_content, file_backup_write, indent=4, ensure_ascii=False)
 
         return True
+
+    @staticmethod
+    def get_backup_content(backup_id: str) -> dict:
+        path = f'./backups/{backup_id}.json'
+
+        if not os.path.isfile(path):
+            return False
+
+        with open(path, 'r') as backup_file:
+            backup = json.load(backup_file)
+            backup_file.close()
+            return backup
 
 
 if __name__ == '__main__':
